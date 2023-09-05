@@ -1,4 +1,8 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="modelo.dao.*"%>
+<%@page import="modelo.entidades.*"%>
+<%@page import="java.util.Iterator"%>
+<%@page import="java.util.List"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
@@ -18,11 +22,26 @@
             return true;
         }
         
-        function eliminarProducto(productId) {
-            // Find the row in the table with the given product ID
-            var row = document.getElementById("row-" + productId);
-            // Remove the row from the table
+        function eliminarProducto(item) {
+            // Encuentra la fila en la tabla con el ítem dado
+            var row = document.getElementById("row-" + item);
+            // Elimina la fila de la tabla
             row.parentNode.removeChild(row);
+            // Vuelve a calcular el precio total
+            recalcularTotal();
+        }
+
+        function recalcularTotal() {
+            var subtotalElements = document.querySelectorAll("[data-subtotal]");
+            var total = 0;
+            subtotalElements.forEach(function(element) {
+                total += parseFloat(element.textContent);
+            });
+            document.querySelector("[name='txtSubTotalV']").value = "$/. " + total.toFixed(2);
+            var iva = (12 * total) / 100;
+            document.querySelector("[name='txtIVA']").value = "$/. " + iva.toFixed(2);
+            var totalFinal = total + iva;
+            document.querySelector("[name='txtTotal']").value = "$/. " + totalFinal.toFixed(2);
         }
 
     </script>
@@ -35,7 +54,7 @@
                 <form action="Controlador?menu=Venta" method="post">
                     <div class="card-body">
                         <div class="form-group">
-                            <label>Nombre del Responsable</label>
+                            <label>Nombre del Responsable dsd</label>
                         </div>
                         <div class="form-group d-flex">
                             <div class="col-sm-6 d-flex">
@@ -97,25 +116,23 @@
                             <th>Cantidad</th>
                             <th>Subtotal</th>
                             <th>Acciones</th>
-
-                    
+                        </tr>
+                    </thead>
                     <tbody>
                         <c:forEach var="list" items="${lista}">
-                            <tr id="row-${list.getProducto().getIdProducto()}">
+                            <tr id="row-${list.getItem()}">
                                 <td>${list.getItem()}</td>
                                 <td>${list.getProducto().getIdProducto()}</td>
                                 <td>${list.getDescripcionP()}</td>
                                 <td>${list.getPrecio()}</td>                                        
                                 <td>${list.getCantidad()}</td>
-                                <td>${list.getSubTotal()}</td>
+                                <td data-subtotal>${list.getSubTotal()}</td>
                                 <td class="d-flex">
-                                    <a href="#" class="btn btn-danger" style="margin-left: 10px" onclick="eliminarProducto(${list.getProducto().getIdProducto()})">Eliminar</a>
+                                    <a href="#" class="btn btn-danger" style="margin-left: 10px" onclick="eliminarProducto(${list.getItem()})">Eliminar</a>
                                 </td>
                             </tr>
                         </c:forEach>
                     </tbody>
-                    
-               
                 </table>                        
             </div>     
             <div class="card-footer d-flex">
